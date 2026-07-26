@@ -1,0 +1,28 @@
+# Render Blueprint for the static (prerendered) Nuxt site.
+# Pins the build + publish path and, crucially, sets cache headers so the HTML
+# is always revalidated (no stale index.html pointing at old /_nuxt hashes),
+# while the content-hashed assets are cached hard.
+#
+# NOTE: no catch-all SPA rewrite here on purpose — every route is prerendered
+# (index.html + projects/<slug>/index.html), so Render serves them directly.
+services:
+  - type: web
+    name: eportfolio-v2
+    runtime: static
+    buildCommand: pnpm install && pnpm build
+    staticPublishPath: ./.output/public
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+    headers:
+      # Default: HTML and everything else must revalidate — prevents stale pages.
+      - path: /*
+        name: Cache-Control
+        value: "no-cache"
+      # Hashed build assets never change for a given hash — cache them forever.
+      - path: /_nuxt/*
+        name: Cache-Control
+        value: "public, max-age=31536000, immutable"
+      - path: /_fonts/*
+        name: Cache-Control
+        value: "public, max-age=31536000, immutable"
