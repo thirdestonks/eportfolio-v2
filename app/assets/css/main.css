@@ -1,0 +1,215 @@
+/* ============================================================================
+   CRT PORTFOLIO — global foundation
+   The whole site pretends to be a CRT monitor: a fixed, non-scrolling screen.
+   "Filters" are phosphor themes. Each maps onto the legacy --primary/--secondary
+   variable names so existing components (project dossier, etc.) stay styled and
+   become filter-reactive for free.
+   ============================================================================ */
+
+:root {
+  --pixel: 'Press Start 2P', 'IBM Plex Mono', monospace;
+
+  /* Default filter = P1 GREEN */
+  --bg: #040b0a;
+  --surface: rgba(7, 17, 7, 0.55);
+  --surface-2: rgba(9, 21, 9, 0.6);
+  --primary: #7cff5b;
+  --secondary: #ffc857;
+  --text: #c6ffb9;
+  --muted: #5f9d5e;
+  --border: rgba(124, 255, 91, 0.24);
+  --border-soft: rgba(124, 255, 91, 0.1);
+  --shadow: 0 0 25px rgba(124, 255, 91, 0.1);
+  --glow: rgba(124, 255, 91, 0.6);
+}
+
+/* BLADE RUNNER — ESPER blue/teal with a warm amber accent */
+[data-filter='blade'] {
+  --bg: #04141a;
+  --surface: rgba(6, 20, 26, 0.55);
+  --surface-2: rgba(9, 28, 36, 0.6);
+  --primary: #6fd3e8;
+  --secondary: #ffb34a;
+  --text: #bfe9f2;
+  --muted: #5a8a97;
+  --border: rgba(111, 211, 232, 0.24);
+  --border-soft: rgba(111, 211, 232, 0.1);
+  --shadow: 0 0 25px rgba(111, 211, 232, 0.1);
+  --glow: rgba(111, 211, 232, 0.6);
+}
+
+/* CYBERPUNK — nocturnal: warm rose-red with a purple accent */
+[data-filter='cyber'] {
+  --bg: #0b0612;
+  --surface: rgba(22, 9, 28, 0.55);
+  --surface-2: rgba(30, 12, 38, 0.6);
+  --primary: #ff4d6d;
+  --secondary: #a56bff;
+  --text: #ffcdd8;
+  --muted: #9a6b8c;
+  --border: rgba(255, 77, 109, 0.24);
+  --border-soft: rgba(165, 107, 255, 0.12);
+  --shadow: 0 0 25px rgba(165, 107, 255, 0.14);
+  --glow: rgba(255, 77, 109, 0.55);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  /* No page scroll — the CRT screen is a fixed viewport. Panels scroll inside. */
+  overflow: hidden;
+}
+
+body {
+  background: #000;
+  color: var(--text);
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  line-height: 1.7;
+}
+
+a {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+/* ---- Shared CRT overlay layers (used by the layout shell) ----------------- */
+.crt-scan {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.3) 0 1px, transparent 1px 3px);
+  mix-blend-mode: multiply;
+}
+
+.crt-dither {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image: radial-gradient(color-mix(in srgb, var(--primary) 16%, transparent) 1px, transparent 1.4px);
+  background-size: 3px 3px;
+  mix-blend-mode: screen;
+}
+
+.crt-glow {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(0, 0, 0, 0.62) 100%);
+}
+
+/* ---- Shared HUD panel primitives (used by section panels) ----------------- */
+.hud-panel {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  backdrop-filter: blur(2px);
+  padding: clamp(1.4rem, 3.4vmin, 3.2rem);
+  max-height: 74vmin;
+  overflow: auto;
+  box-shadow: var(--shadow);
+}
+
+.hud-tag {
+  font-family: var(--pixel);
+  font-size: clamp(0.55rem, 1.1vmin, 0.75rem);
+  color: var(--secondary);
+  letter-spacing: 0.15em;
+}
+
+.hud-title {
+  font-family: var(--pixel);
+  color: var(--primary);
+  font-size: clamp(1.3rem, 2.6vmin, 2.4rem);
+  line-height: 1.3;
+  margin: clamp(0.8rem, 1.4vmin, 1.4rem) 0 clamp(1.4rem, 2.6vmin, 2.6rem);
+  text-shadow: 0 0 1.4vmin color-mix(in srgb, var(--primary) 45%, transparent);
+}
+
+.hud-panel p {
+  max-width: 56ch;
+  line-height: 1.9;
+  margin-bottom: 1.1rem;
+  font-size: clamp(0.85rem, 1.6vmin, 1.05rem);
+}
+
+.hud-muted {
+  color: var(--muted);
+}
+
+.hud-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(clamp(9rem, 20vmin, 14rem), 1fr));
+  gap: clamp(0.7rem, 1.4vmin, 1.4rem);
+  margin-top: 0.6rem;
+}
+
+.hud-cell {
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  padding: clamp(0.9rem, 1.6vmin, 1.6rem);
+  font-size: clamp(0.8rem, 1.4vmin, 1rem);
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.hud-cell:hover {
+  border-color: var(--primary);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow);
+}
+
+.hud-cell b {
+  font-family: var(--pixel);
+  color: var(--primary);
+  font-size: clamp(0.6rem, 1.2vmin, 0.85rem);
+  line-height: 1.5;
+  display: block;
+  margin-bottom: 0.7rem;
+}
+
+.hud-cell small {
+  color: var(--muted);
+}
+
+/* Legacy component compatibility (project dossier renders inside the CRT) ---- */
+section {
+  width: 100%;
+}
+
+.section-terminal-title {
+  color: var(--muted);
+  margin-bottom: 2rem;
+  font-size: 1rem;
+}
+
+.status-live {
+  color: var(--secondary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+}
