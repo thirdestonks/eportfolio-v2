@@ -1,150 +1,167 @@
 <script setup lang="ts">
 import type { Project } from '~/types'
 
-defineProps<{ project: Project }>()
-
+const props = defineProps<{ project: Project }>()
 const { activeSection, pulse } = useCrt()
+
+const active = ref('about')
+
+const screens = computed(() => props.project.dossier?.screens ?? [])
+const lightImages = computed(() =>
+  screens.value.length ? screens.value.map(s => s.image) : [props.project.image],
+)
+const heroImage = computed(() => lightImages.value[0])
+
+const tabs = computed(() => {
+  const list = [
+    { id: 'about', label: 'ABOUT' },
+    { id: 'build', label: 'BUILD.LOG' },
+    { id: 'features', label: 'FEATURES' },
+  ]
+  if (screens.value.length) list.push({ id: 'screens', label: 'SCREENS' })
+  return list
+})
+
+function setTab(id: string) {
+  active.value = id
+  pulse()
+}
+
 function backToProjects() {
   activeSection.value = 'projects'
   pulse()
 }
+
+// Lightbox
+const lightbox = ref(false)
+const lightIndex = ref(0)
+
+function openLightbox(i = 0) {
+  lightIndex.value = i
+  lightbox.value = true
+}
+function closeLightbox() {
+  lightbox.value = false
+}
+function step(dir: number) {
+  const n = lightImages.value.length
+  lightIndex.value = (lightIndex.value + dir + n) % n
+}
+
+function onKey(e: KeyboardEvent) {
+  if (!lightbox.value) return
+  if (e.key === 'Escape') {
+    closeLightbox()
+  }
+  else if (e.key === 'ArrowRight') {
+    step(1)
+  }
+  else if (e.key === 'ArrowLeft') {
+    step(-1)
+  }
+}
+
+onMounted(() => window.addEventListener('keydown', onKey))
+onUnmounted(() => window.removeEventListener('keydown', onKey))
 </script>
 
 <template>
-  <div v-if="project.dossier">
-    <section class="project-hero">
-      <div class="project-terminal-path">
-        &gt; ~/projects/{{ project.slug }}
-      </div>
+  <div
+    v-if="project.dossier"
+    class="dossier"
+  >
+    <div class="bar">
+      <span class="path">&gt; ~/projects/{{ project.slug }}</span>
+      <NuxtLink
+        to="/"
+        class="back"
+        @click="backToProjects"
+      >
+        <i class="fa-solid fa-arrow-left" /> back to projects
+      </NuxtLink>
+    </div>
 
-      <div class="project-terminal-window">
-        <div class="project-terminal-top">
-          <div class="terminal-dots">
-            <span /><span /><span />
+    <!-- Hero: title/description left, image + meta right -->
+    <div class="hero">
+      <div class="hero-left">
+        <div class="hud-tag">
+          // {{ project.role }}
+        </div>
+        <h1 class="title">
+          {{ project.title }}
+        </h1>
+        <p class="subtitle">
+          {{ project.dossier.subtitle }}
+        </p>
+
+        <div class="meta-bar">
+          <div class="m">
+            <span>STATUS</span>{{ project.dossier.status }}
           </div>
-          <div class="project-terminal-title">
-            {{ project.slug }}.app
+          <div class="m">
+            <span>STACK</span>{{ project.dossier.stack }}
           </div>
-          <div class="project-terminal-status">
-            {{ project.dossier.status }}
+          <div class="m">
+            <span>TYPE</span>{{ project.dossier.type }}
+          </div>
+          <div class="m">
+            <span>{{ project.dossier.extraMeta.label }}</span>{{ project.dossier.extraMeta.value }}
           </div>
         </div>
+      </div>
 
-        <div class="project-terminal-body">
-          <div class="project-header">
-            <div class="project-title-group">
-              <h1>{{ project.title }}</h1>
-              <p class="project-subtitle">
-                {{ project.dossier.subtitle }}
-              </p>
-            </div>
-
-            <div class="project-meta">
-              <div class="project-meta-row">
-                <span>STATUS</span>
-                <span>{{ project.dossier.status }}</span>
-              </div>
-              <div class="project-meta-row">
-                <span>STACK</span>
-                <span>{{ project.dossier.stack }}</span>
-              </div>
-              <div class="project-meta-row">
-                <span>TYPE</span>
-                <span>{{ project.dossier.type }}</span>
-              </div>
-              <div class="project-meta-row">
-                <span>{{ project.dossier.extraMeta.label }}</span>
-                <span>{{ project.dossier.extraMeta.value }}</span>
-              </div>
-            </div>
-          </div>
-
-          <div
-            v-if="project.dossier.screens"
-            class="mobile-screens-grid"
+      <div class="hero-right">
+        <button
+          v-if="project.portrait"
+          class="phone"
+          type="button"
+          @click="openLightbox(0)"
+        >
+          <img
+            :src="heroImage"
+            :alt="project.alt"
           >
-            <div
-              v-for="screen in project.dossier.screens"
-              :key="screen.image"
-              class="mobile-screen"
-            >
-              <img
-                :src="screen.image"
-                :alt="screen.alt"
-              >
-              <div class="mobile-screen-caption">
-                {{ screen.caption }}
-              </div>
-            </div>
-          </div>
-          <div
-            v-else
-            class="hero-image"
+          <span class="shot-hint">⤢ EXPAND</span>
+        </button>
+        <button
+          v-else
+          class="shot"
+          type="button"
+          @click="openLightbox(0)"
+        >
+          <span class="shot-top">
+            <span class="dots"><i /><i /><i /></span>
+            <span>{{ project.slug }}.app</span>
+          </span>
+          <img
+            :src="heroImage"
+            :alt="project.alt"
           >
-            <img
-              :src="project.image"
-              :alt="project.alt"
-            >
-          </div>
-        </div>
+          <span class="shot-hint">⤢ EXPAND</span>
+        </button>
       </div>
-    </section>
+    </div>
 
-    <section class="process-section">
-      <div class="project-section-title">
-        &gt; build.log
-      </div>
+    <!-- Tabs -->
+    <div class="tabs">
+      <button
+        v-for="tab in tabs"
+        :key="tab.id"
+        class="tab"
+        type="button"
+        :class="{ active: active === tab.id }"
+        @click="setTab(tab.id)"
+      >
+        {{ tab.label }}
+      </button>
+    </div>
 
-      <div class="process-details">
-        <div class="detail-column">
-          <h3>TIMELINE</h3>
-          <p>{{ project.dossier.timeline }}</p>
-        </div>
-
-        <div class="detail-column">
-          <h3>DISCIPLINES</h3>
-          <p>
-            <template
-              v-for="(item, i) in project.dossier.disciplines"
-              :key="item"
-            >
-              {{ item }}<br v-if="i < project.dossier.disciplines.length - 1">
-            </template>
-          </p>
-        </div>
-
-        <div class="detail-column">
-          <h3>TOOLS</h3>
-          <p>
-            <template
-              v-for="(item, i) in project.dossier.tools"
-              :key="item"
-            >
-              {{ item }}<br v-if="i < project.dossier.tools.length - 1">
-            </template>
-          </p>
-        </div>
-
-        <div class="detail-column">
-          <h3>TECH STACK</h3>
-          <p>
-            <template
-              v-for="(item, i) in project.dossier.techStack"
-              :key="item"
-            >
-              {{ item }}<br v-if="i < project.dossier.techStack.length - 1">
-            </template>
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <section class="background-section">
-      <div class="project-section-title">
-        &gt; about_project.md
-      </div>
-
-      <div class="background-content">
+    <!-- Tab body (scrolls internally, page never does) -->
+    <div class="body">
+      <div
+        v-show="active === 'about'"
+        class="pane about"
+      >
         <p
           v-for="paragraph in project.dossier.background"
           :key="paragraph"
@@ -152,388 +169,530 @@ function backToProjects() {
           {{ paragraph }}
         </p>
       </div>
-    </section>
 
-    <section class="features-section">
-      <div class="project-section-title">
-        &gt; feature_registry.json
+      <div
+        v-show="active === 'build'"
+        class="pane build"
+      >
+        <div class="cell">
+          <b>TIMELINE</b>{{ project.dossier.timeline }}
+        </div>
+        <div class="cell">
+          <b>TECH STACK</b>{{ project.dossier.techStack.join(' · ') }}
+        </div>
+        <div class="cell">
+          <b>TOOLS</b>{{ project.dossier.tools.join(' · ') }}
+        </div>
+        <div class="cell">
+          <b>DISCIPLINES</b>{{ project.dossier.disciplines.join(' · ') }}
+        </div>
       </div>
 
-      <div class="features-grid">
+      <div
+        v-show="active === 'features'"
+        class="pane features"
+      >
         <div
           v-for="feature in project.dossier.features"
           :key="feature.title"
-          class="feature-card"
+          class="feature"
         >
           <i :class="feature.icon" />
-          <h3>{{ feature.title }}</h3>
-          <p>{{ feature.description }}</p>
+          <div>
+            <h3>{{ feature.title }}</h3>
+            <p>{{ feature.description }}</p>
+          </div>
         </div>
       </div>
-    </section>
 
-    <footer>
-      <div class="footer-terminal">
-        <span>© {{ new Date().getFullYear() }} thirde.dev — project dossier loaded</span>
-
-        <div class="footer-links">
-          <a
-            href="https://github.com/thirdestonks"
-            target="_blank"
-            rel="noopener"
+      <div
+        v-if="screens.length"
+        v-show="active === 'screens'"
+        class="pane screens"
+      >
+        <button
+          v-for="(screen, i) in screens"
+          :key="screen.image"
+          class="screen"
+          type="button"
+          @click="openLightbox(i)"
+        >
+          <img
+            :src="screen.image"
+            :alt="screen.alt"
           >
-            <i class="fa-brands fa-github" /> github
-          </a>
-          <NuxtLink
-            to="/"
-            @click="backToProjects"
-          >
-            <i class="fa-solid fa-arrow-left" /> back to projects
-          </NuxtLink>
-        </div>
+          <span>{{ screen.caption }}</span>
+        </button>
       </div>
-    </footer>
+    </div>
+
+    <!-- Lightbox -->
+    <div
+      v-if="lightbox"
+      class="lightbox"
+      @click.self="closeLightbox"
+    >
+      <button
+        class="lb-close"
+        type="button"
+        @click="closeLightbox"
+      >
+        ✕
+      </button>
+      <button
+        v-if="lightImages.length > 1"
+        class="lb-nav lb-prev"
+        type="button"
+        @click="step(-1)"
+      >
+        ‹
+      </button>
+      <img
+        :src="lightImages[lightIndex]"
+        :alt="project.alt"
+        class="lb-img"
+      >
+      <button
+        v-if="lightImages.length > 1"
+        class="lb-nav lb-next"
+        type="button"
+        @click="step(1)"
+      >
+        ›
+      </button>
+    </div>
   </div>
 </template>
 
 <style scoped>
-.project-hero {
-  padding-top: 10rem;
-}
-
-.project-terminal-path {
-  color: var(--muted);
-  margin-bottom: 2rem;
-  font-size: 1rem;
-}
-
-.project-terminal-window {
-  border: 1px solid var(--primary);
-  border-radius: 22px;
-  overflow: hidden;
-  background: rgba(2, 4, 2, 0.92);
-  box-shadow:
-    0 0 40px rgba(124, 255, 91, 0.05),
-    inset 0 0 40px rgba(124, 255, 91, 0.02);
-}
-
-.project-terminal-top {
-  height: 64px;
-  padding: 0 1.5rem;
-  display: grid;
-  grid-template-columns: 120px 1fr 120px;
-  align-items: center;
-  border-bottom: 1px solid var(--border);
-  background: rgba(124, 255, 91, 0.03);
-}
-
-.terminal-dots {
+.dossier {
   display: flex;
-  gap: 0.6rem;
+  flex-direction: column;
+  gap: clamp(1rem, 2.4vmin, 2rem);
+  padding-bottom: 2rem;
 }
 
-.terminal-dots span {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-}
-
-.terminal-dots span:nth-child(1) {
-  background: #ff5f56;
-}
-
-.terminal-dots span:nth-child(2) {
-  background: #ffbd2e;
-}
-
-.terminal-dots span:nth-child(3) {
-  background: #27c93f;
-}
-
-.project-terminal-title,
-.project-terminal-status {
-  color: var(--muted);
-  font-size: 0.9rem;
-}
-
-.project-terminal-title {
-  text-align: center;
-}
-
-.project-terminal-status {
-  text-align: right;
-}
-
-.project-terminal-body {
-  padding: 2rem;
-}
-
-.project-header {
-  display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  gap: 3rem;
-  align-items: start;
-  margin-bottom: 3rem;
-}
-
-.project-title-group h1 {
-  font-size: clamp(3rem, 7vw, 5rem);
-  line-height: 0.95;
-  color: var(--primary);
-  margin-bottom: 1.5rem;
-  text-shadow: 0 0 18px rgba(124, 255, 91, 0.16);
-}
-
-.project-subtitle {
-  color: var(--muted);
-  max-width: 720px;
-  line-height: 1.9;
-  font-size: 1.05rem;
-}
-
-.project-meta {
-  border: 1px solid var(--border);
-  background: rgba(124, 255, 91, 0.03);
-}
-
-.project-meta-row {
+.bar {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 1rem;
-  padding: 1rem 1.2rem;
-  border-bottom: 1px solid rgba(124, 255, 91, 0.08);
-}
-
-.project-meta-row:last-child {
-  border-bottom: none;
-}
-
-.project-meta-row span:first-child {
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: clamp(0.75rem, 1.3vmin, 0.95rem);
+  flex-wrap: wrap;
 }
 
-.project-meta-row span:last-child {
+.back {
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: color 0.2s ease;
+}
+
+.back:hover {
   color: var(--primary);
-  text-align: right;
-  font-size: 0.9rem;
 }
 
-.hero-image {
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  overflow: hidden;
-  background: rgba(124, 255, 91, 0.03);
-}
-
-.hero-image img {
-  width: 100%;
-  display: block;
-  filter: contrast(1.05);
-}
-
-.mobile-screens-grid {
+/* Hero */
+.hero {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
+  grid-template-columns: 1.2fr 0.9fr;
+  gap: clamp(1.5rem, 4vmin, 4rem);
+  align-items: center;
 }
 
-.mobile-screen {
-  border: 1px solid var(--border);
-  border-radius: 24px;
-  overflow: hidden;
-  background: rgba(124, 255, 91, 0.03);
+.title {
+  font-family: var(--pixel);
+  color: var(--primary);
+  font-size: clamp(1.6rem, 4.4vmin, 3.6rem);
+  line-height: 1.2;
+  margin: clamp(0.6rem, 1.4vmin, 1.4rem) 0;
+  text-shadow: 0 0 2vmin color-mix(in srgb, var(--primary) 45%, transparent);
 }
 
-.mobile-screen img {
-  width: 100%;
+.subtitle {
+  color: var(--muted);
+  line-height: 1.9;
+  font-size: clamp(0.85rem, 1.6vmin, 1.05rem);
+  max-width: 52ch;
+}
+
+.hero-right {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.8rem, 1.6vmin, 1.4rem);
+}
+
+.shot {
+  position: relative;
   display: block;
-  filter: contrast(1.05);
-}
-
-.mobile-screen-caption {
-  text-align: center;
-  padding: 0.9rem 0;
-  color: var(--muted);
-  font-size: 0.85rem;
-  border-top: 1px solid var(--border);
-}
-
-.project-section-title {
-  color: var(--muted);
-  margin-bottom: 2.5rem;
-  font-size: 1rem;
-}
-
-.process-details {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1.5rem;
-}
-
-.detail-column {
+  width: 100%;
+  padding: 0;
   border: 1px solid var(--border);
-  border-radius: 18px;
-  padding: 2rem;
-  background: rgba(7, 17, 7, 0.45);
-  transition: 0.3s ease;
+  background: var(--surface-2);
+  cursor: pointer;
+  overflow: hidden;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
-.detail-column:hover {
-  transform: translateY(-4px);
+.shot:hover {
   border-color: var(--primary);
   box-shadow: var(--shadow);
 }
 
-.detail-column h3 {
+.shot-top {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.5rem 0.8rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  font-size: clamp(0.6rem, 1.1vmin, 0.78rem);
+}
+
+.dots {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.dots i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+.dots i:first-child {
+  background: var(--primary);
+}
+
+.dots i:nth-child(2) {
+  background: var(--secondary);
+}
+
+.shot img {
+  display: block;
+  width: 100%;
+  max-height: clamp(9rem, 22vmin, 15rem);
+  object-fit: contain;
+  filter: contrast(1.05);
+}
+
+.shot-hint {
+  position: absolute;
+  right: 0.6rem;
+  bottom: 0.6rem;
+  font-family: var(--pixel);
+  font-size: clamp(0.5rem, 0.9vmin, 0.62rem);
+  color: var(--secondary);
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+  padding: 0.3rem 0.5rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.shot:hover .shot-hint {
+  opacity: 1;
+}
+
+/* Portrait projects: wrap the phone screenshot in a device mockup so it reads
+   as intentional instead of a phone shot forced into a wide frame. */
+.phone {
+  position: relative;
+  width: clamp(9rem, 20vmin, 13rem);
+  aspect-ratio: 9 / 19;
+  margin: 0 auto;
+  padding: 0.5rem;
+  border: 2px solid var(--border);
+  border-radius: 1.6rem;
+  background: #05070a;
+  cursor: pointer;
+  overflow: hidden;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.phone:hover {
+  border-color: var(--primary);
+  box-shadow: var(--shadow);
+}
+
+/* notch */
+.phone::before {
+  content: '';
+  position: absolute;
+  top: 0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 34%;
+  height: 0.5rem;
+  background: var(--border);
+  border-radius: 0 0 0.4rem 0.4rem;
+  z-index: 2;
+}
+
+.phone img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 1.2rem;
+}
+
+.phone:hover .shot-hint {
+  opacity: 1;
+}
+
+.meta-bar {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: clamp(1rem, 2vmin, 1.6rem);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.m {
+  flex: 1 1 auto;
+  min-width: max-content;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: clamp(0.8rem, 1.6vmin, 1.2rem) clamp(1rem, 2vmin, 1.4rem);
+  border-right: 1px solid var(--border-soft);
   color: var(--primary);
-  margin-bottom: 1.3rem;
-  font-size: 1rem;
+  font-size: clamp(0.78rem, 1.4vmin, 0.95rem);
+}
+
+.m:last-child {
+  border-right: none;
+}
+
+.m span {
+  font-family: var(--pixel);
+  color: var(--muted);
+  font-size: clamp(0.5rem, 0.95vmin, 0.66rem);
   letter-spacing: 0.08em;
 }
 
-.detail-column p {
-  color: var(--muted);
-  line-height: 2;
-}
-
-.background-content {
-  border: 1px solid var(--border);
-  border-radius: 22px;
-  background: rgba(7, 17, 7, 0.45);
-  padding: 3rem;
+/* Tabs */
+.tabs {
   display: flex;
-  flex-direction: column;
-  gap: 2rem;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.8rem;
 }
 
-.background-content p {
-  color: var(--text);
-  line-height: 2;
-  max-width: 1000px;
-}
-
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem;
-}
-
-.feature-card {
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 2rem;
-  background: rgba(7, 17, 7, 0.45);
-  transition: 0.3s ease;
-}
-
-.feature-card:hover {
-  transform: translateY(-5px);
-  border-color: var(--primary);
-  box-shadow: var(--shadow);
-}
-
-.feature-card i {
-  font-size: 1.5rem;
-  color: var(--secondary);
-  margin-bottom: 1.5rem;
-}
-
-.feature-card h3 {
-  color: var(--primary);
-  margin-bottom: 1rem;
-}
-
-.feature-card p {
+.tab {
+  font-family: var(--pixel);
+  font-size: clamp(0.6rem, 1.2vmin, 0.82rem);
   color: var(--muted);
-  line-height: 1.9;
+  background: transparent;
+  border: 1px solid var(--border-soft);
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease,
+    background 0.15s ease;
 }
 
-footer {
-  margin-top: 4rem;
-  padding: 2rem;
+.tab:hover {
+  color: var(--text);
+}
+
+.tab.active {
+  color: var(--primary);
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+}
+
+/* Body */
+.body {
+  min-height: 0;
+}
+
+.pane {
+  animation: pane 0.3s ease;
+}
+
+@keyframes pane {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.about p {
+  color: var(--text);
+  line-height: 1.95;
+  margin-bottom: 1.2rem;
+  max-width: 78ch;
+  font-size: clamp(0.85rem, 1.5vmin, 1rem);
+}
+
+.build {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(clamp(12rem, 26vmin, 20rem), 1fr));
+  gap: 1rem;
+}
+
+.cell {
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  padding: 1.2rem;
+  color: var(--muted);
+  line-height: 1.8;
+  font-size: clamp(0.8rem, 1.4vmin, 0.95rem);
+}
+
+.cell b {
+  display: block;
+  font-family: var(--pixel);
+  color: var(--primary);
+  font-size: clamp(0.6rem, 1.1vmin, 0.78rem);
+  margin-bottom: 0.7rem;
+}
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(clamp(14rem, 30vmin, 22rem), 1fr));
+  gap: 1rem;
+}
+
+.feature {
+  display: flex;
+  gap: 1rem;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  padding: 1.2rem;
+}
+
+.feature i {
+  color: var(--secondary);
+  font-size: 1.3rem;
+  margin-top: 0.2rem;
+}
+
+.feature h3 {
+  color: var(--primary);
+  font-size: clamp(0.85rem, 1.5vmin, 1.05rem);
+  margin-bottom: 0.4rem;
+}
+
+.feature p {
+  color: var(--muted);
+  line-height: 1.7;
+  font-size: clamp(0.75rem, 1.3vmin, 0.9rem);
+}
+
+.screens {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(clamp(9rem, 18vmin, 13rem), 1fr));
+  gap: 1rem;
+}
+
+.screen {
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  padding: 0;
+  cursor: pointer;
+  overflow: hidden;
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.screen:hover {
+  border-color: var(--primary);
+  transform: translateY(-3px);
+}
+
+.screen img {
+  display: block;
+  width: 100%;
+}
+
+.screen span {
+  display: block;
+  padding: 0.6rem;
+  color: var(--muted);
+  font-size: clamp(0.65rem, 1.1vmin, 0.8rem);
   border-top: 1px solid var(--border);
 }
 
-.footer-terminal {
-  width: min(1400px, 92%);
-  margin: auto;
+/* Lightbox */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
-  flex-wrap: wrap;
+  justify-content: center;
+  padding: 6vmin;
+  background: color-mix(in srgb, var(--bg) 82%, #000);
+  backdrop-filter: blur(3px);
 }
 
-.footer-terminal span {
-  color: var(--muted);
+.lb-img {
+  max-width: 90%;
+  max-height: 86%;
+  object-fit: contain;
+  border: 1px solid var(--primary);
+  box-shadow: 0 0 6vmin color-mix(in srgb, var(--primary) 25%, transparent);
 }
 
-.footer-links {
-  display: flex;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-}
-
-.footer-links a {
-  color: var(--muted);
-  transition: 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.footer-links a:hover {
+.lb-close {
+  position: absolute;
+  top: 3vmin;
+  right: 3vmin;
+  width: 2.6rem;
+  height: 2.6rem;
+  border: 1px solid var(--border);
+  background: transparent;
   color: var(--primary);
+  font-size: 1.1rem;
+  cursor: pointer;
 }
 
-@media (max-width: 992px) {
-  .project-header,
-  .process-details,
-  .features-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .mobile-screens-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .project-terminal-top {
-    grid-template-columns: 1fr;
-    gap: 0.7rem;
-    height: auto;
-    padding: 1rem;
-  }
-
-  .project-terminal-title,
-  .project-terminal-status {
-    text-align: left;
-  }
-
-  .project-terminal-body {
-    padding: 1.5rem;
-  }
-
-  .background-content {
-    padding: 2rem;
-  }
+.lb-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3rem;
+  height: 3rem;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg) 60%, transparent);
+  color: var(--primary);
+  font-size: 1.6rem;
+  cursor: pointer;
 }
 
-@media (max-width: 768px) {
-  .project-title-group h1 {
-    font-size: 3rem;
-  }
+.lb-prev {
+  left: 3vmin;
+}
 
-  .detail-column,
-  .feature-card {
-    padding: 1.5rem;
-  }
+.lb-next {
+  right: 3vmin;
+}
 
-  .background-content {
-    padding: 1.5rem;
-  }
+.lb-close:hover,
+.lb-nav:hover {
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+}
 
-  .mobile-screens-grid {
+@media (max-width: 820px) {
+  .hero {
     grid-template-columns: 1fr;
   }
 }
