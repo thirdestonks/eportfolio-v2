@@ -113,7 +113,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKey))
       <div class="hero-right">
         <button
           v-if="project.portrait"
-          class="phone"
+          class="crt-card phone"
           type="button"
           @click="openLightbox(0)"
         >
@@ -121,23 +121,21 @@ onUnmounted(() => window.removeEventListener('keydown', onKey))
             :src="heroImage"
             :alt="project.alt"
           >
-          <span class="shot-hint">⤢ EXPAND</span>
+          <span class="crt-scan" />
+          <span class="expand">⤢ EXPAND</span>
         </button>
         <button
           v-else
-          class="shot"
+          class="crt-card shot"
           type="button"
           @click="openLightbox(0)"
         >
-          <span class="shot-top">
-            <span class="dots"><i /><i /><i /></span>
-            <span>{{ project.slug }}.app</span>
-          </span>
           <img
             :src="heroImage"
             :alt="project.alt"
           >
-          <span class="shot-hint">⤢ EXPAND</span>
+          <span class="crt-scan" />
+          <span class="expand">⤢ EXPAND</span>
         </button>
       </div>
     </div>
@@ -247,11 +245,14 @@ onUnmounted(() => window.removeEventListener('keydown', onKey))
       >
         ‹
       </button>
-      <img
-        :src="lightImages[lightIndex]"
-        :alt="project.alt"
-        class="lb-img"
-      >
+      <div class="lb-frame">
+        <img
+          :src="lightImages[lightIndex]"
+          :alt="project.alt"
+          class="lb-img"
+        >
+        <span class="crt-scan" />
+      </div>
       <button
         v-if="lightImages.length > 1"
         class="lb-nav lb-next"
@@ -324,53 +325,97 @@ onUnmounted(() => window.removeEventListener('keydown', onKey))
   gap: clamp(0.8rem, 1.6vmin, 1.4rem);
 }
 
-.shot {
+/* CRT view-card — shared by the landscape shot and the portrait phone. Makes
+   the image look like it's on a little CRT: scanlines, vignette, glow, a scan
+   sweep on hover, and an EXPAND overlay. */
+.crt-card {
   position: relative;
   display: block;
   width: 100%;
   padding: 0;
   border: 1px solid var(--border);
-  background: var(--surface-2);
+  background: #05070a;
   cursor: pointer;
   overflow: hidden;
+  box-shadow: inset 0 0 3vmin rgba(0, 0, 0, 0.55);
   transition:
     border-color 0.2s ease,
-    box-shadow 0.2s ease;
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 
-.shot:hover {
+.crt-card:hover {
   border-color: var(--primary);
-  box-shadow: var(--shadow);
+  transform: translateY(-3px);
+  box-shadow:
+    inset 0 0 3vmin rgba(0, 0, 0, 0.55),
+    0 0 3vmin color-mix(in srgb, var(--primary) 24%, transparent);
 }
 
-.shot-top {
+.crt-scan {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.26) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at center, transparent 58%, rgba(0, 0, 0, 0.5) 100%);
+  mix-blend-mode: multiply;
+}
+
+.crt-card::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -30%;
+  height: 30%;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(transparent, color-mix(in srgb, var(--primary) 20%, transparent), transparent);
+}
+
+.crt-card:hover::after {
+  animation: card-sweep 1.1s ease;
+}
+
+@keyframes card-sweep {
+  0% {
+    top: -30%;
+    opacity: 0.85;
+  }
+
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+.expand {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
   display: flex;
   align-items: center;
-  gap: 0.8rem;
-  padding: 0.5rem 0.8rem;
-  border-bottom: 1px solid var(--border);
-  color: var(--muted);
-  font-size: clamp(0.6rem, 1.1vmin, 0.78rem);
+  justify-content: center;
+  font-family: var(--pixel);
+  font-size: clamp(0.6rem, 1.2vmin, 0.85rem);
+  letter-spacing: 0.1em;
+  color: var(--primary);
+  background: color-mix(in srgb, var(--bg) 55%, transparent);
+  text-shadow: 0 0 1.4vmin var(--glow);
+  opacity: 0;
+  transition: opacity 0.2s ease;
 }
 
-.dots {
-  display: flex;
-  gap: 0.35rem;
+.crt-card:hover .expand {
+  opacity: 1;
 }
 
-.dots i {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: var(--muted);
-}
-
-.dots i:first-child {
-  background: var(--primary);
-}
-
-.dots i:nth-child(2) {
-  background: var(--secondary);
+/* landscape shot */
+.shot {
+  border-radius: 12px;
 }
 
 .shot img {
@@ -378,50 +423,19 @@ onUnmounted(() => window.removeEventListener('keydown', onKey))
   width: 100%;
   max-height: clamp(9rem, 22vmin, 15rem);
   object-fit: contain;
-  filter: contrast(1.05);
+  filter: contrast(1.05) saturate(1.05);
 }
 
-.shot-hint {
-  position: absolute;
-  right: 0.6rem;
-  bottom: 0.6rem;
-  font-family: var(--pixel);
-  font-size: clamp(0.5rem, 0.9vmin, 0.62rem);
-  color: var(--secondary);
-  background: color-mix(in srgb, var(--bg) 70%, transparent);
-  padding: 0.3rem 0.5rem;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.shot:hover .shot-hint {
-  opacity: 1;
-}
-
-/* Portrait projects: wrap the phone screenshot in a device mockup so it reads
-   as intentional instead of a phone shot forced into a wide frame. */
+/* portrait phone device */
 .phone {
-  position: relative;
   width: clamp(9rem, 20vmin, 13rem);
   aspect-ratio: 9 / 19;
   margin: 0 auto;
   padding: 0.5rem;
-  border: 2px solid var(--border);
+  border-width: 2px;
   border-radius: 1.6rem;
-  background: #05070a;
-  cursor: pointer;
-  overflow: hidden;
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
 }
 
-.phone:hover {
-  border-color: var(--primary);
-  box-shadow: var(--shadow);
-}
-
-/* notch */
 .phone::before {
   content: '';
   position: absolute;
@@ -432,7 +446,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKey))
   height: 0.5rem;
   background: var(--border);
   border-radius: 0 0 0.4rem 0.4rem;
-  z-index: 2;
+  z-index: 3;
 }
 
 .phone img {
@@ -441,10 +455,6 @@ onUnmounted(() => window.removeEventListener('keydown', onKey))
   height: 100%;
   object-fit: cover;
   border-radius: 1.2rem;
-}
-
-.phone:hover .shot-hint {
-  opacity: 1;
 }
 
 .meta-bar {
@@ -641,14 +651,49 @@ onUnmounted(() => window.removeEventListener('keydown', onKey))
   padding: 6vmin;
   background: color-mix(in srgb, var(--bg) 82%, #000);
   backdrop-filter: blur(3px);
+  animation: lb-fade 0.25s ease;
+}
+
+@keyframes lb-fade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.lb-frame {
+  position: relative;
+  max-width: 92%;
+  max-height: 88%;
+  overflow: hidden;
+  border: 1px solid var(--primary);
+  border-radius: 10px;
+  box-shadow: 0 0 6vmin color-mix(in srgb, var(--primary) 25%, transparent);
+  animation: lb-open 0.4s cubic-bezier(0.2, 1, 0.3, 1);
+}
+
+@keyframes lb-open {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+    filter: brightness(2.2);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
 }
 
 .lb-img {
-  max-width: 90%;
-  max-height: 86%;
+  display: block;
+  max-width: 100%;
+  max-height: 84vh;
   object-fit: contain;
-  border: 1px solid var(--primary);
-  box-shadow: 0 0 6vmin color-mix(in srgb, var(--primary) 25%, transparent);
 }
 
 .lb-close {
