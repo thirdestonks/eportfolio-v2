@@ -22,7 +22,7 @@ export default defineNuxtConfig({
             'Thirde Aguilera — Full Stack Software Engineer based in Manila, Philippines.',
         },
       ],
-      link: [{ rel: 'icon', href: '/images/profile-icon.png', type: 'image/png' }],
+      link: [{ rel: 'icon', href: '/images/profile-icon2.png', type: 'image/png' }],
     },
   },
 
