@@ -160,8 +160,98 @@ export const projects: Project[] = [
     },
   },
   {
-    slug: 'ortibites',
+    slug: 'ebet-oss',
     index: '04',
+    role: 'FULL-STACK ENGINEER',
+    note: 'EBET-OSS (TESDA SYSTEM)',
+    title: 'EBET-OSS',
+    description:
+      'A digital platform for Enterprise-Based Education and Training, taking the registration of training programs — through to payment — fully online.',
+    image: '/images/ebet-oss.svg',
+    alt: 'EBET-OSS',
+    dossier: {
+      subtitle:
+        'Enterprise-Based Education and Training Online Support System — digitizing training program registration for enterprises, from application through to payment.',
+      status: 'IN DEVELOPMENT',
+      stack: 'NUXT 4 + LARAVEL',
+      type: 'ENTERPRISE SYSTEM',
+      extraMeta: { label: 'TARGET LAUNCH', value: 'NOVEMBER 2026' },
+      timeline: 'Early 2026 - Current',
+      disciplines: ['Software Architecture', 'Full Stack Development'],
+      tools: ['AWS EC2', 'AWS S3'],
+      techStack: ['Nuxt 4', 'Laravel', 'AWS EC2', 'AWS S3'],
+      background: [
+        'EBET-OSS digitizes the Enterprise-Based Education and Training process — today, an enterprise registering a new training program does it manually, end to end. This system moves that whole flow online, from registration through to payment.',
+        'As primary decision-maker on the system’s architecture as well as a full-stack contributor, the build is targeting a November 2026 official launch.',
+        'Payment is currently receipt-based while gateway integration is being built out, and authentication runs through TESDA’s shared T2MIS SSO — the same identity layer T2MIS itself is extending to every module as it transitions to microservices.',
+      ],
+      features: [
+        {
+          icon: 'fa-solid fa-file-signature',
+          title: 'Digitized Registration',
+          description: 'Replaces the fully manual enterprise training program registration process with an end-to-end online flow.',
+        },
+        {
+          icon: 'fa-solid fa-receipt',
+          title: 'Payment (Receipt-Based)',
+          description: 'Handles payment via receipts today, with full gateway integration coming soon.',
+        },
+        {
+          icon: 'fa-solid fa-key',
+          title: 'Unified TESDA SSO',
+          description: 'Authenticates through the shared T2MIS SSO, the same identity system being extended across TESDA as T2MIS moves to microservices.',
+        },
+      ],
+    },
+  },
+  {
+    slug: 't2mis',
+    index: '05',
+    role: 'FULL-STACK ENGINEER',
+    note: 'T2MIS (TESDA SYSTEM)',
+    title: 'T2MIS (Microservices)',
+    description:
+      'The TVET Training Information System — a legacy super-system running TVET processes, in the middle of a module-by-module conversion into microservices.',
+    image: '/images/t2mis.svg',
+    alt: 'T2MIS',
+    dossier: {
+      subtitle:
+        'TVET Training Information System — converting a legacy monolith into microservices, module by module, on the way to becoming a full data warehouse.',
+      status: 'IN DEVELOPMENT',
+      stack: 'LARAVEL + INERTIA + VUE',
+      type: 'ENTERPRISE SYSTEM',
+      extraMeta: { label: 'CURRENT MODULE', value: 'TRAINING (IN PROGRESS)' },
+      timeline: 'Sep 2025 - Current',
+      disciplines: ['Software Architecture', 'Full Stack Development'],
+      tools: [],
+      techStack: ['Laravel', 'Inertia.js', 'Vue'],
+      background: [
+        'T2MIS is the legacy super-system behind TVET (Technical Vocational Education and Training) processes across TESDA — it’s been the backbone for years, but as a single large legacy codebase.',
+        'The work here is converting T2MIS module by module into microservices, with the end goal of turning it into a proper data warehouse rather than one monolithic system.',
+        'The Training module is the one currently under conversion. The same shared SSO being unified across this migration is also what EBET-OSS authenticates through.',
+      ],
+      features: [
+        {
+          icon: 'fa-solid fa-diagram-project',
+          title: 'Monolith to Microservices',
+          description: 'Converting T2MIS module by module from a legacy monolith into standalone microservices.',
+        },
+        {
+          icon: 'fa-solid fa-warehouse',
+          title: 'Data Warehouse Transition',
+          description: 'Each converted module is a step toward T2MIS becoming a full data warehouse.',
+        },
+        {
+          icon: 'fa-solid fa-graduation-cap',
+          title: 'Training Module (In Progress)',
+          description: 'The Training module is the module currently being converted to a microservice.',
+        },
+      ],
+    },
+  },
+  {
+    slug: 'ortibites',
+    index: '06',
     role: 'MOBILE ENGINEER',
     note: 'PERSONAL PROJECT',
     title: 'OrtiBites',
@@ -170,6 +260,7 @@ export const projects: Project[] = [
     image: '/images/ob-login.png',
     alt: 'OrtiBites',
     portrait: true,
+    icon: '/images/orbites-icon.png',
     dossier: {
       subtitle:
         'A retro-inspired food memory app for Ortigas workers discovering, rating, and revisiting their favorite food spots.',
@@ -237,6 +328,80 @@ export const projects: Project[] = [
         { image: '/images/ob-splash.png', alt: 'OrtiBites splash screen', caption: 'splash.tsx' },
         { image: '/images/ob-login.png', alt: 'OrtiBites login screen', caption: 'login.tsx' },
         { image: '/images/ob-dash.png', alt: 'OrtiBites diner memory feed', caption: 'memory-feed.tsx' },
+      ],
+    },
+  },
+  {
+    slug: 'photoyou',
+    index: '07',
+    role: 'MOBILE ENGINEER',
+    note: 'PERSONAL PROJECT',
+    title: 'PhotoYou',
+    description:
+      'A digital photobooth app inspired by real photobooth machines, letting you capture a strip and customize your own frame design before sharing it digitally.',
+    image: '/images/photoyou-capture.jpg',
+    alt: 'PhotoYou',
+    portrait: true,
+    icon: '/images/photo-you-icon.png',
+    dossier: {
+      subtitle:
+        'A digital photobooth app inspired by real photobooth machines, letting you capture a strip and customize your own frame design before sharing it digitally.',
+      status: 'DEPLOYED',
+      stack: 'NUXT + CAPACITOR',
+      type: 'MOBILE APP',
+      extraMeta: { label: 'BACKEND', value: 'NONE — FULLY LOCAL' },
+      timeline: '2025 - Current',
+      disciplines: [
+        'Mobile App Design',
+        'User Interface Design',
+        'Mobile App Development',
+      ],
+      tools: ['Capacitor CLI'],
+      techStack: ['Nuxt 3', 'Vue 3', 'Capacitor', 'TypeScript'],
+      background: [
+        'PhotoYou started from a simple habit — me and my partner love hunting down real photobooths wherever we go, so I decided to build our own pocket version of one.',
+        'It recreates the actual photobooth ritual: pick a shot count, strike a pose, and get a finished strip at the end, just like the machines you find at the mall — except this one lives on your phone and needs no backend at all.',
+        'What was originally a browser-based PWA experiment was later rebuilt on Capacitor, turning it into a proper installable mobile app while keeping everything running fully offline and local to the device.',
+      ],
+      features: [
+        {
+          icon: 'fa-solid fa-camera-retro',
+          title: 'Digital Photobooth',
+          description:
+            'A full digital photobooth experience that mirrors the real machines — pose, capture, and get your strip.',
+        },
+        {
+          icon: 'fa-solid fa-table-cells',
+          title: 'Selectable Strip Layouts',
+          description: 'Choose a 2, 3, or 4-photo strip layout before you start shooting.',
+        },
+        {
+          icon: 'fa-solid fa-stopwatch',
+          title: 'Manual or Timed Capture',
+          description: 'Snap on demand, or set a 3, 5, or 10 second timer for hands-free shots.',
+        },
+        {
+          icon: 'fa-solid fa-wand-magic-sparkles',
+          title: '20 Built-In Filters',
+          description:
+            'Twenty filters to style every shot, from Y2K and Neo Noir to Obsession and Cyberpunk.',
+        },
+        {
+          icon: 'fa-solid fa-palette',
+          title: 'Custom Strip Design',
+          description:
+            'Upload your own PNG frame or pick a preset — the strip becomes uniquely yours.',
+        },
+        {
+          icon: 'fa-solid fa-share-nodes',
+          title: 'Download & Share',
+          description: 'Save your finished strip straight to your device, or share it directly from the app.',
+        },
+      ],
+      screens: [
+        { image: '/images/photoyou-capture.jpg', alt: 'PhotoYou capture screen', caption: 'capture.vue' },
+        { image: '/images/photoyou-frame.jpg', alt: 'PhotoYou frame picker screen', caption: 'frame-picker.vue' },
+        { image: '/images/photoyou-result.jpg', alt: 'PhotoYou finished strip screen', caption: 'result.vue' },
       ],
     },
   },

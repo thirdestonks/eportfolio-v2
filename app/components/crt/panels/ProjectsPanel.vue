@@ -25,8 +25,20 @@ const { pulse } = useCrt()
           <span class="idx">{{ project.index }}</span>
           <span class="note">{{ project.note }}</span>
         </div>
-        <h3>{{ project.title }}</h3>
-        <p>{{ project.description }}</p>
+
+        <template v-if="project.icon">
+          <div class="proj-tile">
+            <div class="tile-icon">
+              <img :src="project.icon" :alt="`${project.title} app icon`">
+            </div>
+            <h3 class="tile-title">{{ project.title }}</h3>
+          </div>
+        </template>
+        <template v-else>
+          <h3>{{ project.title }}</h3>
+          <p>{{ project.description }}</p>
+        </template>
+
         <div class="proj-foot">
           <span>{{ project.role }}</span>
           <span class="open">OPEN ▸</span>
@@ -89,6 +101,47 @@ const { pulse } = useCrt()
   font-size: clamp(0.75rem, 1.4vmin, 0.95rem);
   line-height: 1.7;
   flex: 1;
+}
+
+/* Home-screen tile: mobile-app projects surface their real icon in the grid,
+   like an app sitting on a phone's home screen, instead of a text preview. */
+.proj-tile {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  padding: 0.6rem 0;
+}
+
+.tile-icon {
+  width: clamp(3.4rem, 8vmin, 4.4rem);
+  aspect-ratio: 1;
+  border-radius: 22%;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: 0 0.4vmin 1.4vmin rgba(0, 0, 0, 0.5), 0 0 1.6vmin color-mix(in srgb, var(--primary) 20%, transparent);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.tile-icon img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.proj:hover .tile-icon {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 0.6vmin 1.8vmin rgba(0, 0, 0, 0.55), 0 0 2.2vmin color-mix(in srgb, var(--primary) 32%, transparent);
+}
+
+.tile-title {
+  font-family: var(--pixel);
+  color: var(--primary);
+  font-size: clamp(0.75rem, 1.4vmin, 1rem);
+  text-align: center;
 }
 
 .proj-foot {

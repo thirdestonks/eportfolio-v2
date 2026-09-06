@@ -45,17 +45,22 @@ const links = [
         <span>SIGNAL LOW</span>
       </div>
       <ClientOnly>
-        <CrtPortrait />
+        <div class="portrait-flip">
+          <div class="portrait-flip-inner">
+            <CrtPortrait class="portrait-face portrait-face--front" src="/images/profile-icon.png" />
+            <CrtPortrait class="portrait-face portrait-face--back" src="/images/profile2.png" />
+          </div>
+        </div>
       </ClientOnly>
       <div class="id-rows">
         <div class="id-row">
           <span>NAME</span><span>T. AGUILERA</span>
         </div>
         <div class="id-row">
-          <span>SEC</span><span>18752-D</span>
+          <span>EXP</span><span>3+ Years</span>
         </div>
         <div class="id-row">
-          <span>ROLE</span><span>ENGINEER</span>
+          <span>JOB</span><span>Computer Programmer III</span>
         </div>
         <div class="id-row">
           <span>STATUS</span><span class="status-live">ACTIVE</span>
@@ -117,6 +122,33 @@ const links = [
   background: color-mix(in srgb, var(--bg) 60%, #000);
   padding: 0.7rem;
   box-shadow: var(--shadow);
+}
+
+/* Flippable portrait: hover the card to reveal the back photo */
+.portrait-flip {
+  perspective: 1200px;
+}
+
+.portrait-flip-inner {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 300 / 360;
+  transition: transform 0.7s cubic-bezier(0.4, 0.2, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+.portrait-flip:hover .portrait-flip-inner {
+  transform: rotateY(180deg);
+}
+
+.portrait-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+}
+
+.portrait-face--back {
+  transform: rotateY(180deg);
 }
 
 .id-top,

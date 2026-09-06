@@ -24,7 +24,7 @@ const meta = [
       and full stack engineering.
     </p>
     <p class="hud-muted">
-      Currently Computer Programmer II at TESDA, building digital infrastructure
+      Currently Computer Programmer III at TESDA, building digital infrastructure
       for technical education across the Philippines.
     </p>
 

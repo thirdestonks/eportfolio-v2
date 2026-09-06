@@ -2,7 +2,16 @@ import type { Experience } from '~/types'
 
 export const experience: Experience[] = [
   {
-    date: '2025 - PRESENT',
+    date: 'JUN 2026 - PRESENT',
+    title: 'COMPUTER PROGRAMMER III',
+    tag: '[ JOB ORDER ]',
+    isGov: true,
+    company: 'Technical Education and Skills Development Authority',
+    description:
+      'Managing two concurrent projects with expanded scope, moving infrastructure toward AWS EC2 and S3 for scalable deployment and storage.',
+  },
+  {
+    date: '2025 - MAY 2026',
     title: 'COMPUTER PROGRAMMER II',
     tag: '[ JOB ORDER ]',
     isGov: true,

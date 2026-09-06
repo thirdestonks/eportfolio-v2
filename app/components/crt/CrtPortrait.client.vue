@@ -3,9 +3,15 @@
 // keeps its real colours (soft, retro, easy on the eyes). A light filter tint +
 // scanline + mesh overlay (CSS) tie it to the active theme without recolouring
 // the whole face. Client-only (canvas).
-const CW = 300
-const CH = 360
-const CELL = 3
+const props = withDefaults(defineProps<{ src?: string }>(), {
+  src: '/images/profile-icon.png',
+})
+
+// 2x the original sampling grid with a smaller dot cell so the halftone reads
+// as fine detail rather than blur at the card's on-screen size.
+const CW = 600
+const CH = 720
+const CELL = 2
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 
@@ -58,10 +64,11 @@ function load() {
     octx.drawImage(img, (CW - dw) / 2, (CH - dh) / 2, dw, dh)
     draw(octx.getImageData(0, 0, CW, CH).data)
   }
-  img.src = '/images/profile-icon.png'
+  img.src = props.src
 }
 
 onMounted(load)
+watch(() => props.src, load)
 </script>
 
 <template>

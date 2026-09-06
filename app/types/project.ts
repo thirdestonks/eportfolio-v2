@@ -34,6 +34,8 @@ export interface Project {
   /** External link for projects without a dossier page (e.g. company-use only). */
   externalLink?: string
   portrait?: boolean
+  /** App icon (e.g. /images/orbites-icon.png) — renders the grid card as a home-screen tile. */
+  icon?: string
   dossier?: ProjectDossier
 }
 
